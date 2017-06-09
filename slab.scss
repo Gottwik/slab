@@ -1,0 +1,176 @@
+// * ———————————————————————————————————————————————————————— * //
+// * 	slab
+// *	slabs are 10px horizontal stripes that helps form
+// *	vertical layout. Goes from -80px to 80px
+//
+// *	.slab = 		10px
+// *	.slab-2x = 	20px
+//
+// *	subslab = 		-10px
+// * 	subslab-2x = 	-20px
+//
+// * ———————————————————————————————————————————————————————— * //
+// *	Responsiveness
+// *	slab adopt bootstrap 4 style classes
+//
+// *	.slab is non-responsive
+// *	.slab-sm-down will be visible in sm and lower
+// *	.slab-sm-up wil lbe visible in sm and up
+//
+// *	Just add -2x to double slab
+//
+// *	Uses bootstrap 4 media queries
+// * ———————————————————————————————————————————————————————— * //
+
+
+// Check if grid breakpoints is defined(might be by bootstrap)
+// if not, define it again
+$grid-breakpoints: (
+	xs: 0,
+	sm: 544px,
+	md: 768px,
+	lg: 992px,
+	xl: 1280px
+) !default;
+
+// helper list for up and down classes
+$updown: ('up', 'down');
+
+// helper list for up and down classes
+$sublist: ('', 'sub');
+
+// mediaqueries from bootstrap 4
+@function slab-breakpoint-next($name, $breakpoints: $grid-breakpoints, $breakpoint-names: map-keys($breakpoints)) {$n: index($breakpoint-names, $name);@return if($n < length($breakpoint-names), nth($breakpoint-names, $n + 1), null);}
+@function slab-breakpoint-min($name, $breakpoints: $grid-breakpoints) {$min: map-get($breakpoints, $name);@return if($min != 0, $min, null);}
+@function slab-breakpoint-max($name, $breakpoints: $grid-breakpoints) {$next: slab-breakpoint-next($name, $breakpoints);@return if($next, slab-breakpoint-min($next, $breakpoints) - 1px, null);}
+@mixin slab-media-breakpoint-up($name, $breakpoints: $grid-breakpoints) {$min: slab-breakpoint-min($name, $breakpoints);@if $min {@media (min-width: $min) {@content;}} @else {@content;}}
+@mixin slab-media-breakpoint-down($name, $breakpoints: $grid-breakpoints) { $max: slab-breakpoint-max($name, $breakpoints); @if $max {@media (max-width: $max) {@content;}} @else {@content;}}
+
+// Helper mixin to split up and down media queries
+@mixin slab-breakpoint($direction, $name){
+	@if $direction == 'up' {
+		@include slab-media-breakpoint-up($name) {
+			@content;
+		}
+	} @else {
+		@include slab-media-breakpoint-down($name) {
+			@content;
+		}
+	}
+}
+
+
+// Base for all slabs
+%slabcore {
+	clear: both;
+	display: block;
+	width: 100%;
+}
+
+// Produces one slab
+@mixin get-slab($multiplier: 1) {
+	@if $multiplier > 0 {
+		height: $multiplier * 10px;
+	} @else {
+		margin-bottom: $multiplier * 10px;
+	}
+}
+
+
+// * ———————————————————————————————————————————————————————— * //
+// * 	slab
+// * ———————————————————————————————————————————————————————— * //
+.slab {
+	@include get-slab();
+	@extend %slabcore;
+}
+
+
+// * ———————————————————————————————————————————————————————— * //
+// * 	Subslab
+// * ———————————————————————————————————————————————————————— * //
+.subslab {
+	@include get-slab(-1);
+	@extend %slabcore;
+}
+
+
+// * ———————————————————————————————————————————————————————— * //
+// * 	Multi slabs
+// * ———————————————————————————————————————————————————————— * //
+@for $i from 2 through 8 {
+	.slab-#{$i}x {
+		@include get-slab($i);
+		@extend %slabcore;
+	}
+
+	.subslab-#{$i}x {
+		@include get-slab(-1 * $i);
+		@extend %slabcore;
+	}
+}
+
+%nodisplay {
+	display: none;
+}
+
+// * ———————————————————————————————————————————————————————— * //
+// * 	Responsive slabs
+// * ———————————————————————————————————————————————————————— * //
+@each $breakpoint, $size in $grid-breakpoints {
+
+	@each $direction in $updown{
+		// hide responsive classes
+		@each $sub in $sublist {
+			.#{$sub}slab-#{$breakpoint}-#{$direction} {
+				@extend %nodisplay;
+			}
+
+			@for $i from 2 through 8 {
+				.#{$sub}slab-#{$breakpoint}-#{$direction}-#{$i}x {
+					@extend %nodisplay;
+				}
+			}
+		}
+
+		@include slab-breakpoint($direction, $breakpoint) {
+
+			// placeholder selector for this media query
+			%slabcore-#{$breakpoint}-#{$direction} {
+				clear: both;
+				display: block;
+				width: 100%;
+			}
+
+			.slab-#{$breakpoint}-#{$direction} {
+				@include get-slab();
+				@extend %slabcore-#{$breakpoint}-#{$direction};
+			}
+
+			.subslab-#{$breakpoint}-#{$direction} {
+				@include get-slab(-1);
+				@extend %slabcore-#{$breakpoint}-#{$direction};
+			}
+
+			@for $i from 2 through 8 {
+				.slab-#{$breakpoint}-#{$direction}-#{$i}x {
+					@include get-slab($i);
+					@extend %slabcore-#{$breakpoint}-#{$direction};
+				}
+
+				.subslab-#{$breakpoint}-#{$direction}-#{$i}x {
+					@include get-slab(-1 * $i);
+					@extend %slabcore-#{$breakpoint}-#{$direction};
+				}
+			}
+		}
+	}
+}
+
+// * ———————————————————————————————————————————————————————— * //
+// * 	Half slab
+// * ———————————————————————————————————————————————————————— * //
+.half-slab {
+	@include get-slab(.5);
+	@extend %slabcore;
+}

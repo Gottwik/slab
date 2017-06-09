@@ -1,0 +1,22 @@
+{
+  "name": "slab",
+  "version": "0.0.1",
+  "homepage": "https://github.com/gottwik/slab",
+  "authors": [
+    "Martin Gottweis <gottwik@gmail.com>"
+  ],
+  "description": "Creates horizontal whitespace",
+  "main": "slab.scss",
+  "moduleType": [],
+  "keywords": [
+    "layout"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
